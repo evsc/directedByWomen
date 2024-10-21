@@ -114,10 +114,10 @@ app.use((req, res) => {
 // Example to fetch actor credits (test it with an actual actor ID)
 // fetchActorCredits(128748); // Replace 123 with a valid TMDB actor ID
 // fetchActorCredits(1907997); // Replace 123 with a valid TMDB actor ID
-pollTMDB();
+// pollTMDB();
 
 // Call pollTMDB every 10 minutes (600,000 milliseconds)
-setInterval(pollTMDB, 600000);
+// setInterval(pollTMDB, 600000);
 
 
 // Start the server

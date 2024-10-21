@@ -49,14 +49,14 @@
       <option value="1" <%= gender === '1' ? 'selected' : '' %>>Actresses</option>
     </select>
 </div>
-<div>
+<!-- <div>
     <label for="market">Market:</label>
      <select id="market" name="market">
       <option value="world" <%= market === 'world' ? 'selected' : '' %>>World</option>
       <option value="us" <%= market === 'us' ? 'selected' : '' %>>US</option>
       <option value="europe" <%= market === 'europe' ? 'selected' : '' %>>Europe</option>
     </select>
-</div>
+</div> -->
   </form>
   </div>
 <!-- Actors list -->
@@ -65,9 +65,9 @@
     <% actors.forEach(actor => { %>
 
      <div class="actor">
-  <div class="actor-background" style="background-image: url('https://image.tmdb.org/t/p/w300<%= actor.file_path %>');width: calc(135px + <%= Math.max(actor.count * 20, 50) %>px);height: calc(135px + <%= Math.max(actor.count * 20, 50) %>px);">
+  <div class="actor-background" style="background-image: url('https://image.tmdb.org/t/p/w300<%= actor.file_path %>');width: calc(135px + <%= Math.max(actor.count * (time === 'all' ? 10 : time === '20' ? 12 : time === '10' ? 15 : 20), 50) %>px);height: calc(135px + <%= Math.max(actor.count * (time === 'all' ? 10 : time === '20' ? 12 : time === '10' ? 15 : 20), 50) %>px);">
   
-    <p class="count"style="font-size: calc(5em + <%= actor.count / 1 %>em);"><%= actor.count %></p>
+    <p class="count"style="font-size: calc(5em + <%= actor.count / (time === 'all' ? 2 : time === '20' ? 1.5 : time === '10' ? 1.2 : 1) %>em);"><%= actor.count %></p>
     <h3><%= actor.name %></h3>
 
     <div class="overlay">

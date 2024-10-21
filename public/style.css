@@ -1,0 +1,103 @@
+body {
+    font-family: 'Roboto', sans-serif; /* Use the font you imported */
+    margin: 10px; /* Remove default margin */
+    padding: 0; /* Remove default padding */
+    background-color: #eeeeff; /* Optional: set a background color */
+}
+
+.header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+footer {
+      margin-top: 30px; /* Space above footer */
+      padding: 0px; /* Padding inside footer */
+      text-align: left; /* Center align text */
+      font-size: 0.8em;
+      vertical-align: middle;
+    }
+
+h1 {
+  font-size: 5em;
+  /*line-height: 0.3;*/
+  margin-top: 40px;
+  margin-bottom: -20px;
+}
+h2 {
+  font-size: 1.5em;
+}
+
+form#filter-form {
+  /*width: 300px;*/
+  margin-top: 30px;
+  text-align: left;
+}
+
+form#filter-form label {
+  display: inline-block;  /* Ensures the label takes up the set width */
+  width: 80px;
+}
+
+select {
+      font-size: 1.5em; /* Larger font size for dropdowns */
+      margin-left: 10px; /* Add space between label and dropdown */
+    }
+
+.actors-list {
+  padding-top:20px;
+  display: flex;              /* Use Flexbox for layout */
+  flex-wrap: wrap;           /* Allow items to wrap to the next line */
+  justify-content: space-between; /* Space out items evenly */
+}
+
+
+.actor {
+  position: relative;
+  color: white; /* Text color */
+  
+  /*padding: 0px;*/
+  margin-bottom: 10px;
+}
+
+.actor-background {
+  background-size: cover; /* Make the background image cover the div */
+  background-position: center; /* Center the image */
+  background-repeat: no-repeat; /* Prevent background image from repeating */
+  height: 185px; 
+  width: 185px; 
+  transition: all 0.3s; /* Smooth transition for hover effect */
+  padding: 5px;
+}
+
+.actor:hover .overlay {
+  display: block; /* Show the movie list on hover */
+}
+
+.overlay {
+  display: none; /* Hide overlay by default */
+  position: absolute; /* Position it relative to the actor div */
+  bottom: 0; /* Position it at the bottom of the actor div */
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.7); /* Optional: Add a translucent background for readability */
+  padding: 10px; /* Add some padding */
+}
+
+.movie-list {
+  font-size: 0.7em; /* Small font size for the movie list */
+  /* list-style-type: none; /* Removes bullet points */
+  padding: 0px;
+  margin: 0;
+}
+
+
+.count {
+  font-size: 9em; /* Large font size for the count */
+  margin: 0; /* Remove default margin */
+  line-height: 0.9; /* Set a small line height, adjust as needed */
+}
+
+

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actor Details</title>
+    <!-- Add the stylesheet reference -->
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div><a href="/">Directed by Women</a></div>
+
+    <h1><%= actor.name %></h1>
+
+    <h2>Details:</h2>
+    <ul>
+        <li><strong>ID:</strong> <%= actor.id %></li>
+        <li><strong>Original Name:</strong> <%= actor.original_name %></li>
+        <li><strong>Gender:</strong> <%= actor.gender === 1 ? 'Female' : actor.gender === 2 ? 'Male' : 'Non-Binary' %></li>
+        <li><strong>Known for:</strong> <%= actor.known_for_department %></li>
+        <li><strong>Popularity:</strong> <%= actor.popularity %></li>
+        <li><strong>Revenue:</strong> <%= actor.revenue %></li>
+        <li><strong>Last Updated:</strong> <%= actor.updated.toDateString() %></li>
+        <li><strong>Profile Image:</strong> 
+            <% if (actor.file_path) { %>
+                <img src="https://image.tmdb.org/t/p/w185<%= actor.file_path %>" alt="<%= actor.name %>'s profile image">
+            <% } else { %>
+                No image available
+            <% } %>
+        </li>
+    </ul>
+
+    <h2>Movies with Female Directors</h2>
+        <strong>Last 5 Years Count:</strong> <%= actor.cnt_last5 %><br/>
+        <strong>Last 10 Years Count:</strong> <%= actor.cnt_last10 %><br/>
+        <strong>Last 20 Years Count:</strong> <%= actor.cnt_last20 %><br/>
+        <strong>All Time Count:</strong> <%= actor.cnt_all %><br/>
+
+    <h3>Movie list:</h3>
+    <ul>
+        <% actor.list_all.forEach(function(movie) { %>
+            <li><%= movie %></li>
+        <% }); %>
+    </ul>
+
+
+
+    
+<footer>
+    <a href="about.html">About this page</a> | 
+    &copy; 2024  |
+    Powered by : <a href="https://www.themoviedb.org/"><img src="/blue_short-tmdb.svg" alt="TMDB Logo" style="width: 150px;"></a>
+  </footer>
+
+</body>
+</html>

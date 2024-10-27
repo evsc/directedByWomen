@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+
     <div><a href="/">Directed by Women</a></div>
 
     <h1><%= actor.name %></h1>
@@ -19,8 +20,11 @@
         <li><strong>Gender:</strong> <%= actor.gender === 1 ? 'Female' : actor.gender === 2 ? 'Male' : 'Non-Binary' %></li>
         <li><strong>Known for:</strong> <%= actor.known_for_department %></li>
         <li><strong>Popularity:</strong> <%= actor.popularity %></li>
-        <li><strong>Revenue:</strong> <%= actor.revenue %></li>
-        <li><strong>Last Updated:</strong> <%= actor.updated.toDateString() %></li>
+        <li><strong>Revenue:</strong> <%= actor.revenue ? actor.revenue : 'N/A' %></li>
+        <li><strong>Total Movies:</strong> <%= actor.movies_total %></li>
+        <li><strong>directedByWomenPercentage:</strong> <%= (actor.directedByWomenPercentage * 100).toFixed(0) %>% %></li>
+        <li><strong>top5billing:</strong> <%= actor.top5billing ? actor.top5billing : 'N/A' %> </li>
+        <li><strong>Last Updated:</strong> <%= actor.updated.toLocaleString() %></li>
         <li><strong>Profile Image:</strong> 
             <% if (actor.file_path) { %>
                 <img src="https://image.tmdb.org/t/p/w185<%= actor.file_path %>" alt="<%= actor.name %>'s profile image">
@@ -36,7 +40,7 @@
         <strong>Last 20 Years Count:</strong> <%= actor.cnt_last20 %><br/>
         <strong>All Time Count:</strong> <%= actor.cnt_all %><br/>
 
-    <h3>Movie list:</h3>
+    <h3>Movies:</h3>
     <ul>
         <% actor.list_all.forEach(function(movie) { %>
             <li><%= movie %></li>

@@ -3,11 +3,10 @@ const mongoose = require('mongoose');
 const path = require('path');
 require('dotenv').config(); // Ensure this is included to load .env variables
 
-
+const Movie = require('./models/Movie');
 const Actor = require('./models/Actor');
 const Director = require('./models/Director');
-const { fetchActorCredits, pollTMDB } = require('./fetchData')
-
+const { updateActor, loopPopularityPage, loopActorUpdates } = require('./fetchData')
 
 const app = express();
 
@@ -26,29 +25,44 @@ mongoose.connect(mongoUri, {
 
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
-
 // Set the views directory
 app.set('views', path.join(__dirname, 'views'));
-
 // Static files (CSS, images, etc.)
 app.use(express.static(path.join(__dirname, 'public')));
 
 
+
+
+
+
+
 // Define the main route
 app.get('/', async (req, res) => {
-  const { time = 'all', gender = 'all', market = 'world' } = req.query;
+  const { time = '10', gender = 'all', revenue = '1000000', popularity = 'all', movies = '10', top5billing = '5' } = req.query;
 
   try {
     // Build the query to fetch actors
-    let actorQuery = {};
-
-    // console.log(`time: ${time}`);
-    // console.log(`gender: ${gender}`);
-    // console.log(`market: ${market}`);
+    let filterCriteria = { known_for_department: 'Acting' };
 
     // Filter by gender if provided
     if (gender !== 'all') {
-      actorQuery.gender = parseInt(gender);
+      filterCriteria.gender = parseInt(gender);
+    }
+
+    if (revenue !== 'all') {
+      filterCriteria.revenue = { $gte: parseInt(revenue) };
+    }
+
+    if (popularity !== 'all') {
+      filterCriteria.popularity = { $gte: parseInt(popularity) };
+    }
+
+    if (movies !== 'all') {
+      filterCriteria.movies_total = { $gte: parseInt(movies) };
+    }
+
+    if (top5billing !== 'all') {
+      filterCriteria.top5billing = { $gte: parseInt(top5billing) };
     }
 
     // Determine the count and list field based on the 'time' filter
@@ -66,9 +80,9 @@ app.get('/', async (req, res) => {
     }
 
     // Fetch actors sorted by the number of movies directed by women, for the selected time period
-    const actors = await Actor.find(actorQuery)
+    const actors = await Actor.find(filterCriteria)
       .sort({ [countField]: -1 }) // Sort by the count of movies in descending order
-      .limit(20); // Limit the result to the top 10 actors
+      .limit(30); // Limit the result to the top 10 actors
 
     // Prepare the result to send to the view
     const actorsData = actors.map(actor => ({
@@ -79,7 +93,7 @@ app.get('/', async (req, res) => {
     }));
 
     // Render the index page with the actors
-    res.render('index', { actors: actorsData, time, gender, market });
+    res.render('index', { actors: actorsData, time, gender, revenue, popularity, movies, top5billing });
   } catch (err) {
     console.error('Error fetching actors:', err);
     res.status(500).send('Internal server error');
@@ -106,18 +120,158 @@ app.get('/actor/:id', async (req, res) => {
   }
 });
 
+
+
+// Route to fetch all actors with pagination and sorting
+app.get('/all', async (req, res) => {
+  try {
+    // Extract pagination, sorting, and filtering parameters
+    const page = parseInt(req.query.page) || 1; // Default to the first page
+    const limit = 100; // Number of results per page
+    const sortField = req.query.sortField || 'name'; // Default sorting field
+    const sortOrder = req.query.sortOrder === 'desc' ? 'desc' : 'asc'; // Ascending or descending
+    const genderFilter = req.query.gender || '0'; // Gender filter, defaults to 'all'
+    const revenueFilter = req.query.revenue || 'all'; // Revenue filter, defaults to 'all'
+    const popularityFilter = req.query.popularity || 'all';
+    const moviesTotalFilter = req.query.moviesTotal || 'all';
+    const top5billingFilter = req.query.top5billing || 'all';
+
+    // Calculate the skip value for pagination
+    const skip = (page - 1) * limit;
+
+    // Build the filter criteria based on gender
+    const filterCriteria = { known_for_department: 'Acting' };
+
+    if (genderFilter !== '0') {
+      filterCriteria.gender = genderFilter === '1' ? 1 : genderFilter === '2' ? 2 : 3;
+    }
+
+    if (popularityFilter !== 'all') {
+      const popularityThreshold = parseInt(popularityFilter);
+      filterCriteria.popularity = { $gte: popularityThreshold };
+    }
+
+    if (moviesTotalFilter !== 'all') {
+      const moviesTotalThreshold = parseInt(moviesTotalFilter);
+      filterCriteria.movies_total = { $gte: moviesTotalThreshold };
+    }
+
+    if (top5billingFilter !== 'all') {
+      const minimumTop5billing = parseInt(top5billingFilter);
+      filterCriteria.top5billing = { $gte: minimumTop5billing };
+    }
+
+    if (revenueFilter !== 'all') {
+      filterCriteria.revenue = { $gte: parseInt(revenueFilter) };
+    }
+
+    // Fetch actors with pagination, sorting, and filtering
+    const actors = await Actor.find(filterCriteria)
+      .sort({ [sortField]: sortOrder === 'desc' ? -1 : 1 }) // Sort dynamically based on query params
+      .skip(skip)
+      .limit(limit);
+
+    // Count total actors for pagination with the applied filter
+    const totalActors = await Actor.countDocuments(filterCriteria);
+
+    res.render('all', {
+      actors,
+      totalActors,
+      currentPage: page,
+      limit,
+      sortField,
+      sortOrder,
+      genderFilter,
+      revenueFilter,
+      popularityFilter,
+      moviesTotalFilter,
+      top5billingFilter
+    });
+  } catch (error) {
+    console.error('Error fetching actors:', error);
+    res.status(500).send('Error fetching actors');
+  }
+});
+
+
+// Stats route
+app.get('/stats', async (req, res) => {
+  try {
+    const now = new Date();
+    const oneWeekAgo = new Date(now.setDate(now.getDate() - 7));
+
+    // Get counts for actors
+    const [actorsTotal, actorsUpdated, actorsWithoutRevenue, actorsWithoutTop5Billing] = await Promise.all([
+      Actor.countDocuments(),
+      Actor.countDocuments({ updatedAt: { $gte: oneWeekAgo } }),
+      Actor.countDocuments({ $or: [{ revenue: { $exists: false } }, { revenue: null }, { revenue: "" }] }), // Count missing revenue
+      Actor.countDocuments({ top5billing: { $exists: false } }), // Count missing top5billing
+    ]);
+
+    const [moviesTotal, moviesUpdated] = await Promise.all([
+      Movie.countDocuments(),
+      Movie.countDocuments({ updated: { $gte: oneWeekAgo } }),
+    ]);
+
+    const [directorsTotal, directorsUpdated] = await Promise.all([
+      Director.countDocuments(),
+      Director.countDocuments({ updated: { $gte: oneWeekAgo } }),
+    ]);
+
+    // Pass the data to the stats view
+    res.render('stats', {
+      stats: [
+        { name: 'Actors', total: actorsTotal, updated: actorsUpdated, noRevenue: actorsWithoutRevenue, noTop5Billing: actorsWithoutTop5Billing },
+        { name: 'Movies', total: moviesTotal, updated: moviesUpdated },
+        { name: 'Directors', total: directorsTotal, updated: directorsUpdated },
+      ],
+    });
+  } catch (error) {
+    console.error('Error fetching stats:', error);
+    res.status(500).send('Error retrieving stats');
+  }
+});
+
+
+
+
+async function updateActorEntries() {
+  try {
+    // Fetch all actors from the database
+    const actors = await Actor.find();
+
+    for (let actor of actors) {
+      actor.movies_total = actor.movies.length;
+      await actor.save();
+    }
+
+    console.log('All actors updated successfully!');
+  } catch (error) {
+    console.error('Error updating actors:', error);
+  }
+}
+
+
+
+
+
 // Error handling for unknown routes
 app.use((req, res) => {
   res.status(404).send('404 - Page not found');
 });
 
-// Example to fetch actor credits (test it with an actual actor ID)
-// fetchActorCredits(128748); // Replace 123 with a valid TMDB actor ID
-// fetchActorCredits(1907997); // Replace 123 with a valid TMDB actor ID
-// pollTMDB();
 
-// Call pollTMDB every 10 minutes (600,000 milliseconds)
-// setInterval(pollTMDB, 600000);
+
+
+// loopPopularityPage();
+// setInterval(loopPopularityPage, 200000);
+
+
+
+// loopActorUpdates();
+// setInterval(loopActorUpdates, 40000);
+// updateActors();
+// updateActor(4095744,true);
 
 
 // Start the server
@@ -126,3 +280,5 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 //
+
+

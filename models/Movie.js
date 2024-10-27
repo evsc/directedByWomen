@@ -15,6 +15,7 @@ const movieSchema = new mongoose.Schema({
   updated: { type: Date, default: Date.now }, // Last time the data was updated
   director_gender: { type: Number }, // Use 1 for Female, 2 for Male
   director: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Director' }], // Array of director IDs
+  lead_top5: [ Number ],
 });
 
 module.exports = mongoose.model('Movie', movieSchema);

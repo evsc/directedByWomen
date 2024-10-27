@@ -13,12 +13,24 @@ body {
     }
 
 footer {
-      margin-top: 30px; /* Space above footer */
-      padding: 0px; /* Padding inside footer */
+      margin-top: 60px; /* Space above footer */
+      padding-top: 5px; /* Padding inside footer */
       text-align: left; /* Center align text */
       font-size: 0.8em;
-      vertical-align: middle;
+      width: 100%; /* Make the footer span the whole page */
+      border-top: 1px solid #555; /* Adds a solid border line on top */
+      display: flex; /* Use flexbox for layout */
+      justify-content: space-between; /* Distribute the divs evenly */
+      align-items: center; /* Vertically center content */
     }
+
+footer div {
+    flex: 1; /* Ensure each div takes equal space */
+    display: flex; /* Use flexbox within each div */
+    justify-content: center; /* Center content horizontally within each div */
+    align-items: center; /* Vertically align the content in the middle */
+    text-align: center; /* Center the text inside each div */
+}
 
 h1 {
   font-size: 5em;
@@ -38,11 +50,12 @@ form#filter-form {
 
 form#filter-form label {
   display: inline-block;  /* Ensures the label takes up the set width */
-  width: 80px;
+  width: 160px;
 }
 
 select {
-      font-size: 1.5em; /* Larger font size for dropdowns */
+      font-size: 1.3em; /* Larger font size for dropdowns */
+      margin-bottom: 2px;
       margin-left: 10px; /* Add space between label and dropdown */
     }
 
@@ -101,3 +114,84 @@ select {
 }
 
 
+/*list pages*/
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: #fff;
+}
+
+/* Style the table header */
+table thead {
+    background-color: #758; /* Darker background color */
+    color: #fff;            /* White text for contrast */
+}
+
+table thead th {
+    padding: 2px;          /* Padding inside header cells */
+    text-align: center;       /* Align text to the left */
+    border-bottom: 0px solid #444; /* Optional border for the header row */
+}
+
+/* Optional: Add hover effect for sorting links */
+table thead th a {
+    color: #fff;             /* Keep sorting links white */
+    text-decoration: none;   /* Remove underline */
+}
+
+table thead th a:hover {
+    color: #ddd;             /* Slight color change on hover */
+}
+
+table th, table td {
+    padding: 2px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+table th a {
+    color: #333;
+    text-decoration: none;
+}
+
+/* Style the gender filter dropdown in the table header */
+table th form {
+    display: inline-block;
+    margin-left: 5px;
+}
+
+table th select {
+    font-size: 0.9em;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+}
+
+table td a {
+    color: #666;
+    /*text-decoration: none;*/
+}
+
+table td a:hover {
+    color: #a0a; 
+}
+
+.pagination {
+    margin-top: 20px;
+    text-align: center;
+    line-height: 35px;
+}
+
+.pagination a {
+    margin: 0 5px;
+    padding: 5px 10px;
+    text-decoration: none;
+    border: 1px solid #ddd;
+    color: #333;
+}
+
+.pagination a.active {
+    font-weight: bold;
+    background-color: #f0f0f0;
+}

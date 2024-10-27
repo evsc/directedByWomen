@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Statistics</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div><a href="/">Directed by Women</a></div>
+  <h1>Statistics</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Table</th>
+        <th>Total Entries</th>
+        <th>Entries Updated in Last Week</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% stats.forEach(stat => { %>
+        <tr>
+          <td><%= stat.name %></td>
+          <td><%= stat.total %></td>
+          <td><%= stat.updated %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+
+  <p>Actors without revenue defined: <%= stats[0].noRevenue %></p>
+  <p>Actors without top5billing defined: <%= stats[0].noTop5Billing %></p>
+</body>
+</html>

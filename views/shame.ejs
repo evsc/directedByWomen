@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Directed by Women</title>
+  <!-- Add the stylesheet reference -->
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+ <div><a href="/">Directed by Women</a></div>
+  <div class="header">
+    <div>
+  <h1>The Shame List</h1>
+  <h2 class="subtitle">List of performers with a total movie revenue above 1 billion, at least 25 movie credits, at least 20 top-5-billings, but with the least films directed by women.</h2>
+</div>
+  </div>
+<!-- Actors list -->
+
+  <div class="actors-list">
+    <% actors.forEach(actor => { %>
+
+     <div class="actor">
+  <div class="actor-background" style="background-image: url('https://image.tmdb.org/t/p/w300<%= actor.file_path %>');width: calc(250px - <%= Math.min(actor.count * 50, 150) %>px);height: calc(250px - <%= Math.min(actor.count * 50, 150) %>px);">
+  
+    <p class="count"style="font-size: 10em"><%= actor.count %></p>
+    <h3><%= actor.name %></h3>
+
+    <div class="overlay">
+      <ul class="movie-list">
+        <% actor.list.forEach(movie => { %>
+          <li><%= movie %></li>
+        <% }) %>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+    <% }) %>
+  </div>
+
+
+<footer>
+    <div>
+      <a href="about.html">About this page</a>, &copy; 2024
+    </div>
+
+    <div>
+      Powered by :  <a href="https://www.themoviedb.org/"><img src="/blue_short-tmdb.svg" alt="TMDB Logo" style="width: 150px;"></a>
+    </div>
+
+    <div>
+      <a href='https://ko-fi.com/W7W41KRRZ' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi3.png?v=3' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
+    </div>
+  </footer>
+
+</body>
+</html>

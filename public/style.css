@@ -50,7 +50,7 @@ form#filter-form {
 
 form#filter-form label {
   display: inline-block;  /* Ensures the label takes up the set width */
-  width: 160px;
+  width:180px;
 }
 
 select {

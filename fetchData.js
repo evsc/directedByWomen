@@ -14,7 +14,7 @@ function delay(ms) {
 }
 
 let updateThreshold = 1;  // days
-let currentPage = 30;
+let currentPage = 49;
 let currentActor = 46;
 
 

@@ -39,7 +39,7 @@
 </div>
   <form id="filter-form">
     <div>
-    <label for="time">Time:</label>
+    <label for="time">Time span:</label>
     <select id="time" name="time">
       <option value="5" <%= time === '5' ? 'selected' : '' %>>Last 5 years</option>
       <option value="10" <%= time === '10' ? 'selected' : '' %>>Last 10 years</option>
@@ -57,13 +57,13 @@
     </select>
 </div>
 <div>
-    <label for="revenue">Revenue all movies:</label>
+    <label for="revenue">Movie revenue alltime:</label>
     <select id="revenue" name="revenue">
       <option value="all" <%= revenue === 'all' ? 'selected' : '' %>>All</option>
       <option value="1000000" <%= revenue === '1000000' ? 'selected' : '' %>>Above 1 Million</option>
       <option value="100000000" <%= revenue === '100000000' ? 'selected' : '' %>>Above 100 Million</option>
       <option value="500000000" <%= revenue === '500000000' ? 'selected' : '' %>>Above 500 Million</option>
-      <option value="1000000000" <%= revenue === '10000000000' ? 'selected' : '' %>>Above 1 Billion</option>
+      <option value="1000000000" <%= revenue === '1000000000' ? 'selected' : '' %>>Above 1 Billion</option>
       <option value="5000000000" <%= revenue === '5000000000' ? 'selected' : '' %>>Above 5 Billion</option>
     </select>
 </div>
@@ -97,7 +97,7 @@
     </select>
 </div>
 <br/>
-<div><a href="/all">Browse all</a></div>
+<div><a href="/all">Browse all</a> | <a href="/shame">The Shame List</a></div>
   </form>
   </div>
 <!-- Actors list -->

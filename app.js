@@ -81,8 +81,8 @@ app.get('/', async (req, res) => {
 
     // Fetch actors sorted by the number of movies directed by women, for the selected time period
     const actors = await Actor.find(filterCriteria)
-      .sort({ [countField]: -1 }) // Sort by the count of movies in descending order
-      .limit(30); // Limit the result to the top 10 actors
+      .sort({ [countField]: -1, name: 1 }) // Sort by the count of movies in descending order
+      .limit(50); // Limit the result to the top 10 actors
 
     // Prepare the result to send to the view
     const actorsData = actors.map(actor => ({
@@ -94,6 +94,61 @@ app.get('/', async (req, res) => {
 
     // Render the index page with the actors
     res.render('index', { actors: actorsData, time, gender, revenue, popularity, movies, top5billing });
+  } catch (err) {
+    console.error('Error fetching actors:', err);
+    res.status(500).send('Internal server error');
+  }
+});
+
+
+// Define the main route
+app.get('/shame', async (req, res) => {
+  const { time = 'all', gender = 'all', revenue = '1000000000', popularity = 'all', movies = '25', top5billing = '20' } = req.query;
+
+  try {
+    // Build the query to fetch actors
+    let filterCriteria = { known_for_department: 'Acting' };
+
+    // Filter by gender if provided
+    if (gender !== 'all') {
+      filterCriteria.gender = parseInt(gender);
+    }
+
+    if (revenue !== 'all') {
+      filterCriteria.revenue = { $gte: parseInt(revenue) };
+    }
+
+    if (popularity !== 'all') {
+      filterCriteria.popularity = { $gte: parseInt(popularity) };
+    }
+
+    if (movies !== 'all') {
+      filterCriteria.movies_total = { $gte: parseInt(movies) };
+    }
+
+    if (top5billing !== 'all') {
+      filterCriteria.top5billing = { $gte: parseInt(top5billing) };
+    }
+
+    // Determine the count and list field based on the 'time' filter
+    let countField = 'cnt_all';
+    let listField = 'list_all';
+
+    // Fetch actors sorted by the number of movies directed by women, for the selected time period
+    const actors = await Actor.find(filterCriteria)
+      .sort({ [countField]: 1, revenue: -1 }) // Sort by the count of movies in descending order
+      .limit(50); // Limit the result to the top 10 actors
+
+    // Prepare the result to send to the view
+    const actorsData = actors.map(actor => ({
+      name: actor.name,
+      file_path: actor.file_path,
+      count: actor[countField],  // Get the count based on the time filter
+      list: actor[listField]      // Get the list based on the time filter
+    }));
+
+    // Render the index page with the actors
+    res.render('shame', { actors: actorsData });
   } catch (err) {
     console.error('Error fetching actors:', err);
     res.status(500).send('Internal server error');

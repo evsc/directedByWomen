@@ -14,8 +14,8 @@ function delay(ms) {
 }
 
 let updateThreshold = 1;  // days
-let currentPage = 49;
-let currentActor = 46;
+let currentPage = 247;
+let currentActor = 380;
 
 
 
@@ -24,12 +24,13 @@ let currentActor = 46;
 async function loopActorUpdates() {
   console.log(`Request actor ${currentActor}.`);
   try {
-    updateActor(currentActor,false);
+    updateActor(currentActor,true);
   }
   catch (error) {
     console.error('Error polling TMDB:', error);
   }
   currentActor++;
+  if(currentActor>500) currentActor = 1;
 }
 
 
@@ -99,6 +100,8 @@ async function updateActor(actorId, forceUpdate) {
             id: actorData.id,
             name: actorData.name,
             original_name: actorData.original_name,
+            birthday: actorData.birthday,
+            deathday: actorData.deathday,
             gender: actorData.gender,
             known_for_department: actorData.known_for_department,
             popularity: actorData.popularity,
@@ -117,6 +120,7 @@ async function updateActor(actorId, forceUpdate) {
             list_last20: [],
             directedByWomenPercentage: 0,
             top5billing: 0,
+            topLanguage: '',
         },
         { upsert: true, new: true }
     );
@@ -139,6 +143,8 @@ async function updateActor(actorId, forceUpdate) {
       return dateB - dateA;
     });
 
+    const allLanguages = [];
+
     for (const movie of sortedMovies) {
       const updatedMovie = await updateMovie(movie.id);
 
@@ -148,6 +154,7 @@ async function updateActor(actorId, forceUpdate) {
         // Add movie ID to actor's movie list if not already present
         if (!actor.movies.includes(updatedMovie._id)) { 
           actor.movies.push(updatedMovie._id);
+          allLanguages.push(updatedMovie.original_language);
         }
         actor.revenue += updatedMovie.revenue;
 
@@ -185,6 +192,7 @@ async function updateActor(actorId, forceUpdate) {
     }
 
     // Save the actor with updated movie information
+    actor.topLanguage = getMostFrequentLanguage(allLanguages);
     actor.directedByWomenPercentage = actor.movies.length > 0 ? actor.cnt_all / actor.movies.length : 0;
     actor.movies_total = actor.movies.length;
     await actor.save();
@@ -197,6 +205,31 @@ async function updateActor(actorId, forceUpdate) {
   }
 
 }
+
+
+function getMostFrequentLanguage(allLanguages) {
+  // Create an object to store the occurrence count for each language
+  const languageCount = {};
+
+  // Count occurrences of each language
+  allLanguages.forEach(language => {
+    languageCount[language] = (languageCount[language] || 0) + 1;
+  });
+
+  // Find the language with the highest count
+  let mostFrequentLanguage = null;
+  let maxCount = 0;
+
+  for (const [language, count] of Object.entries(languageCount)) {
+    if (count > maxCount) {
+      mostFrequentLanguage = language;
+      maxCount = count;
+    }
+  }
+
+  return mostFrequentLanguage;
+}
+
 
 
 
@@ -231,6 +264,7 @@ async function updateMovie(movieId) {
           title: movieCreditsData.title,
           original_title: movieCreditsData.original_title,
           release_date: movieCreditsData.release_date,
+          original_language: movieCreditsData.original_language,
           runtime: movieCreditsData.runtime,
           status: movieCreditsData.status,
           budget: movieCreditsData.budget,

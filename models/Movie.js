@@ -6,6 +6,7 @@ const movieSchema = new mongoose.Schema({
   title: { type: String, required: true },
   original_title: String,
   release_date: { type: Date },
+  original_language: String,
   runtime: Number,
   budget: Number,
   revenue: Number,

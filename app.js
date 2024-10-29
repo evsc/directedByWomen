@@ -9,6 +9,8 @@ const Director = require('./models/Director');
 const { updateActor, loopPopularityPage, loopActorUpdates } = require('./fetchData')
 
 const app = express();
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json()); // Add this line for JSON parsing
 
 // Connect to MongoDB
 const mongoUri = process.env.MONGODB_URI;
@@ -190,6 +192,7 @@ app.get('/all', async (req, res) => {
     const popularityFilter = req.query.popularity || 'all';
     const moviesTotalFilter = req.query.moviesTotal || 'all';
     const top5billingFilter = req.query.top5billing || 'all';
+    const topLanguageFilter = req.query.topLanguage || "all";
 
     // Calculate the skip value for pagination
     const skip = (page - 1) * limit;
@@ -219,12 +222,19 @@ app.get('/all', async (req, res) => {
     if (revenueFilter !== 'all') {
       filterCriteria.revenue = { $gte: parseInt(revenueFilter) };
     }
+    if (topLanguageFilter !== 'all') {
+      filterCriteria.topLanguage = topLanguageFilter;
+    }
 
     // Fetch actors with pagination, sorting, and filtering
     const actors = await Actor.find(filterCriteria)
       .sort({ [sortField]: sortOrder === 'desc' ? -1 : 1 }) // Sort dynamically based on query params
       .skip(skip)
       .limit(limit);
+
+    // Fetch distinct languages and remove empty strings
+    const allLanguages = (await Actor.distinct("topLanguage"))
+      .filter(language => language !== null && language.trim() !== "");
 
     // Count total actors for pagination with the applied filter
     const totalActors = await Actor.countDocuments(filterCriteria);
@@ -240,7 +250,9 @@ app.get('/all', async (req, res) => {
       revenueFilter,
       popularityFilter,
       moviesTotalFilter,
-      top5billingFilter
+      top5billingFilter,
+      topLanguageFilter,
+      allLanguages
     });
   } catch (error) {
     console.error('Error fetching actors:', error);
@@ -256,11 +268,13 @@ app.get('/stats', async (req, res) => {
     const oneWeekAgo = new Date(now.setDate(now.getDate() - 7));
 
     // Get counts for actors
-    const [actorsTotal, actorsUpdated, actorsWithoutRevenue, actorsWithoutTop5Billing] = await Promise.all([
+    const [actorsTotal, actorsUpdated, actorsWithoutRevenue, actorsWithoutTop5Billing, actorsWithoutBirthday, actorsWithoutLanguage] = await Promise.all([
       Actor.countDocuments(),
       Actor.countDocuments({ updatedAt: { $gte: oneWeekAgo } }),
       Actor.countDocuments({ $or: [{ revenue: { $exists: false } }, { revenue: null }, { revenue: "" }] }), // Count missing revenue
       Actor.countDocuments({ top5billing: { $exists: false } }), // Count missing top5billing
+      Actor.countDocuments({ birthday: { $exists: false } }), 
+      Actor.countDocuments({ topLanguage: { $exists: false } }), 
     ]);
 
     const [moviesTotal, moviesUpdated] = await Promise.all([
@@ -276,7 +290,7 @@ app.get('/stats', async (req, res) => {
     // Pass the data to the stats view
     res.render('stats', {
       stats: [
-        { name: 'Actors', total: actorsTotal, updated: actorsUpdated, noRevenue: actorsWithoutRevenue, noTop5Billing: actorsWithoutTop5Billing },
+        { name: 'Actors', total: actorsTotal, updated: actorsUpdated, noRevenue: actorsWithoutRevenue, noTop5Billing: actorsWithoutTop5Billing, noBirthday: actorsWithoutBirthday, noLanguage: actorsWithoutLanguage },
         { name: 'Movies', total: moviesTotal, updated: moviesUpdated },
         { name: 'Directors', total: directorsTotal, updated: directorsUpdated },
       ],
@@ -287,6 +301,22 @@ app.get('/stats', async (req, res) => {
   }
 });
 
+
+app.get('/update', (req, res) => {
+  res.render('update'); 
+});
+
+app.post('/submit-actor-update', async (req, res) => {
+  const { actorId } = req.body;
+
+  try {
+    await updateActor(actorId, true);
+    res.status(200).send(`Performer with ID ${actorId} has been updated successfully. <a href='/actor/${actorId}'>Visit their profile.</a>`);
+  } catch (error) {
+    console.error('Error updating actor:', error);
+    res.status(500).send('Error updating actor');
+  }
+});
 
 
 

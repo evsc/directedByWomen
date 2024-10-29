@@ -5,6 +5,8 @@ const actorSchema = new mongoose.Schema({
   id: { type: Number, required: true, unique: true },
   name: { type: String, required: true },
   original_name: String,
+  birthday: { type: Date },
+  deathday: { type: Date },
   gender: { type: Number, required: true }, // Use 1 for Female, 2 for Male
   known_for_department: String,
   popularity: Number,
@@ -23,6 +25,7 @@ const actorSchema = new mongoose.Schema({
   list_all: [{ type: String }], // Array of strings for all time movies (title, director, year)
   directedByWomenPercentage: Number,
   top5billing: Number,
+  topLanguage: String,
 });
 
 module.exports = mongoose.model('Actor', actorSchema);

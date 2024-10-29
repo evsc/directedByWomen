@@ -12,7 +12,7 @@
   <table>
     <thead>
       <tr>
-        <th>Table</th>
+        <th></th>
         <th>Total Entries</th>
         <th>Entries Updated in Last Week</th>
       </tr>
@@ -28,7 +28,36 @@
     </tbody>
   </table>
 
-  <p>Actors without revenue defined: <%= stats[0].noRevenue %></p>
-  <p>Actors without top5billing defined: <%= stats[0].noTop5Billing %></p>
+  <table>
+    <thead>
+      <tr>
+        <th></th>
+        <th>Count</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>Total performers</td>
+          <td><%= stats[0].total %></td>
+        </tr>
+        <tr>
+          <td>No revenue</td>
+          <td><%= stats[0].noRevenue %></td>
+        </tr>
+        <tr>
+          <td>No top5billing</td>
+          <td><%= stats[0].noTop5Billing %></td>
+        </tr>
+        <tr>
+          <td>No birthday</td>
+          <td><%= stats[0].noBirthday %></td>
+        </tr>
+        <tr>
+          <td>No topLanguage</td>
+          <td><%= stats[0].noLanguage %></td>
+        </tr>
+    </tbody>
+  </table>
+
 </body>
 </html>

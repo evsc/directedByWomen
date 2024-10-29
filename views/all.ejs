@@ -15,8 +15,8 @@
     <thead>
       <tr>
         <!-- Updated sorting logic with all filters in each header link -->
-        <th><a href="?sortField=name&sortOrder=<%= sortField === 'name' && sortOrder === 'asc' ? 'desc' : 'asc' %>&gender=<%= genderFilter %>&revenue=<%= revenueFilter %>&popularity=<%= popularityFilter %>&moviesTotal=<%= moviesTotalFilter %>&top5billing=<%= top5billingFilter %>">Name</a></th>
-        <th><a href="?sortField=id&sortOrder=<%= sortField === 'id' && sortOrder === 'asc' ? 'desc' : 'asc' %>&gender=<%= genderFilter %>&revenue=<%= revenueFilter %>&popularity=<%= popularityFilter %>&moviesTotal=<%= moviesTotalFilter %>&top5billing=<%= top5billingFilter %>">ID</a></th>
+        <th><a href="?sortField=name&sortOrder=<%= sortField === 'name' && sortOrder === 'asc' ? 'desc' : 'asc' %>&gender=<%= genderFilter %>&revenue=<%= revenueFilter %>&popularity=<%= popularityFilter %>&moviesTotal=<%= moviesTotalFilter %>&top5billing=<%= top5billingFilter %>&topLanguage=<%= topLanguageFilter %>">Name</a></th>
+        <th><a href="?sortField=id&sortOrder=<%= sortField === 'id' && sortOrder === 'asc' ? 'desc' : 'asc' %>&gender=<%= genderFilter %>&revenue=<%= revenueFilter %>&popularity=<%= popularityFilter %>&moviesTotal=<%= moviesTotalFilter %>&top5billing=<%= top5billingFilter %>&topLanguage=<%= topLanguageFilter %>">ID</a></th>
         <th>
           Gender<br/>
           <!-- Gender Filter Dropdown in Header -->
@@ -34,10 +34,34 @@
             <input type="hidden" name="popularity" value="<%= popularityFilter %>">
             <input type="hidden" name="moviesTotal" value="<%= moviesTotalFilter %>">
             <input type="hidden" name="top5billing" value="<%= top5billingFilter %>">
+            <input type="hidden" name="topLanguage" value="<%= topLanguageFilter %>">
           </form>
         </th>
 
-        <th><a href="?sortField=popularity&sortOrder=<%= sortField === 'popularity' && sortOrder === 'asc' ? 'desc' : 'asc' %>&gender=<%= genderFilter %>&revenue=<%= revenueFilter %>&popularity=<%= popularityFilter %>&moviesTotal=<%= moviesTotalFilter %>&top5billing=<%= top5billingFilter %>">TMDB Popularity</a><br/>
+        <th>
+        <a href="?sortField=topLanguage&sortOrder=<%= sortField === 'topLanguage' && sortOrder === 'asc' ? 'desc' : 'asc' %>&gender=<%= genderFilter %>&revenue=<%= revenueFilter %>&popularity=<%= popularityFilter %>&moviesTotal=<%= moviesTotalFilter %>&top5billing=<%= top5billingFilter %>">Top Language</a><br />
+        <!-- Top Language Filter Dropdown in Header -->
+        <form method="GET" action="/all" style="display: inline-block;">
+          <select id="topLanguage-filter" name="topLanguage" onchange="this.form.submit()">
+            <option value="all" <%= topLanguageFilter === 'all' ? 'selected' : '' %>>All</option>
+            <% allLanguages.forEach(language => { %>
+              <option value="<%= language %>" <%= topLanguageFilter === language ? 'selected' : '' %>>
+                <%= language %>
+              </option>
+            <% }); %>
+          </select>
+          <input type="hidden" name="page" value="<%= currentPage %>">
+          <input type="hidden" name="sortField" value="<%= sortField %>">
+          <input type="hidden" name="sortOrder" value="<%= sortOrder %>">
+          <input type="hidden" name="gender" value="<%= genderFilter %>">
+          <input type="hidden" name="revenue" value="<%= revenueFilter %>">
+          <input type="hidden" name="popularity" value="<%= popularityFilter %>">
+          <input type="hidden" name="moviesTotal" value="<%= moviesTotalFilter %>">
+          <input type="hidden" name="top5billing" value="<%= top5billingFilter %>">
+        </form>
+      </th>
+
+        <th><a href="?sortField=popularity&sortOrder=<%= sortField === 'popularity' && sortOrder === 'asc' ? 'desc' : 'asc' %>&gender=<%= genderFilter %>&revenue=<%= revenueFilter %>&popularity=<%= popularityFilter %>&moviesTotal=<%= moviesTotalFilter %>&top5billing=<%= top5billingFilter %>&topLanguage=<%= topLanguageFilter %>">TMDB Popularity</a><br/>
           <!-- Popularity Filter Dropdown -->
           <form method="GET" action="/all" style="display: inline-block;">
             <select id="popularity-filter" name="popularity" onchange="this.form.submit()">
@@ -54,10 +78,11 @@
             <input type="hidden" name="revenue" value="<%= revenueFilter %>">
             <input type="hidden" name="moviesTotal" value="<%= moviesTotalFilter %>">
             <input type="hidden" name="top5billing" value="<%= top5billingFilter %>">
+            <input type="hidden" name="topLanguage" value="<%= topLanguageFilter %>">
           </form>
         </th>
 
-        <th><a href="?sortField=revenue&sortOrder=<%= sortField === 'revenue' && sortOrder === 'asc' ? 'desc' : 'asc' %>&gender=<%= genderFilter %>&revenue=<%= revenueFilter %>&popularity=<%= popularityFilter %>&moviesTotal=<%= moviesTotalFilter %>&top5billing=<%= top5billingFilter %>">Revenue all movies</a><br/>
+        <th><a href="?sortField=revenue&sortOrder=<%= sortField === 'revenue' && sortOrder === 'asc' ? 'desc' : 'asc' %>&gender=<%= genderFilter %>&revenue=<%= revenueFilter %>&popularity=<%= popularityFilter %>&moviesTotal=<%= moviesTotalFilter %>&top5billing=<%= top5billingFilter %>&topLanguage=<%= topLanguageFilter %>">Revenue all movies</a><br/>
           <!-- Revenue Filter Dropdown -->
           <form method="GET" action="/all" style="display: inline-block;">
             <select id="revenue-filter" name="revenue" onchange="this.form.submit()">
@@ -75,10 +100,11 @@
             <input type="hidden" name="popularity" value="<%= popularityFilter %>">
             <input type="hidden" name="moviesTotal" value="<%= moviesTotalFilter %>">
             <input type="hidden" name="top5billing" value="<%= top5billingFilter %>">
+            <input type="hidden" name="topLanguage" value="<%= topLanguageFilter %>">
           </form>
         </th>
 
-        <th><a href="?sortField=movies_total&sortOrder=<%= sortField === 'movies_total' && sortOrder === 'asc' ? 'desc' : 'asc' %>&gender=<%= genderFilter %>&revenue=<%= revenueFilter %>&popularity=<%= popularityFilter %>&moviesTotal=<%= moviesTotalFilter %>&top5billing=<%= top5billingFilter %>">Movie credits</a><br/>
+        <th><a href="?sortField=movies_total&sortOrder=<%= sortField === 'movies_total' && sortOrder === 'asc' ? 'desc' : 'asc' %>&gender=<%= genderFilter %>&revenue=<%= revenueFilter %>&popularity=<%= popularityFilter %>&moviesTotal=<%= moviesTotalFilter %>&top5billing=<%= top5billingFilter %>&topLanguage=<%= topLanguageFilter %>">Movie credits</a><br/>
           <!-- Total Movies Filter Dropdown -->
           <form method="GET" action="/all" style="display: inline-block;">
             <select id="movies-total-filter" name="moviesTotal" onchange="this.form.submit()">
@@ -95,17 +121,18 @@
             <input type="hidden" name="revenue" value="<%= revenueFilter %>">
             <input type="hidden" name="popularity" value="<%= popularityFilter %>">
             <input type="hidden" name="top5billing" value="<%= top5billingFilter %>">
+            <input type="hidden" name="topLanguage" value="<%= topLanguageFilter %>">
           </form>
         </th>
 
-        <th><a href="?sortField=cnt_all&sortOrder=<%= sortField === 'cnt_all' && sortOrder === 'asc' ? 'desc' : 'asc' %>&gender=<%= genderFilter %>&revenue=<%= revenueFilter %>&popularity=<%= popularityFilter %>&moviesTotal=<%= moviesTotalFilter %>&top5billing=<%= top5billingFilter %>">Directed by Women</a></th>
+        <th><a href="?sortField=cnt_all&sortOrder=<%= sortField === 'cnt_all' && sortOrder === 'asc' ? 'desc' : 'asc' %>&gender=<%= genderFilter %>&revenue=<%= revenueFilter %>&popularity=<%= popularityFilter %>&moviesTotal=<%= moviesTotalFilter %>&top5billing=<%= top5billingFilter %>&topLanguage=<%= topLanguageFilter %>">Directed by Women</a></th>
 
 
 
-        <th><a href="?sortField=directedByWomenPercentage&sortOrder=<%= sortField === 'directedByWomenPercentage' && sortOrder === 'asc' ? 'desc' : 'asc' %>&gender=<%= genderFilter %>&revenue=<%= revenueFilter %>&popularity=<%= popularityFilter %>&moviesTotal=<%= moviesTotalFilter %>&top5billing=<%= top5billingFilter %>">Directed by Women Percentage</a></th>
+        <th><a href="?sortField=directedByWomenPercentage&sortOrder=<%= sortField === 'directedByWomenPercentage' && sortOrder === 'asc' ? 'desc' : 'asc' %>&gender=<%= genderFilter %>&revenue=<%= revenueFilter %>&popularity=<%= popularityFilter %>&moviesTotal=<%= moviesTotalFilter %>&top5billing=<%= top5billingFilter %>&topLanguage=<%= topLanguageFilter %>">Directed by Women Percentage</a></th>
 
         <!-- New Top 5 Billing Column with Filter -->
-        <th><a href="?sortField=top5billing&sortOrder=<%= sortField === 'top5billing' && sortOrder === 'asc' ? 'desc' : 'asc' %>&gender=<%= genderFilter %>&revenue=<%= revenueFilter %>&popularity=<%= popularityFilter %>&moviesTotal=<%= moviesTotalFilter %>&top5billing=<%= top5billingFilter %>">Top 5 Billing</a><br/>
+        <th><a href="?sortField=top5billing&sortOrder=<%= sortField === 'top5billing' && sortOrder === 'asc' ? 'desc' : 'asc' %>&gender=<%= genderFilter %>&revenue=<%= revenueFilter %>&popularity=<%= popularityFilter %>&moviesTotal=<%= moviesTotalFilter %>&top5billing=<%= top5billingFilter %>&topLanguage=<%= topLanguageFilter %>">Top 5 Billing</a><br/>
           <!-- Top 5 Billing Filter Dropdown -->
           <form method="GET" action="/all" style="display: inline-block;">
             <select id="top5billing-filter" name="top5billing" onchange="this.form.submit()">
@@ -121,13 +148,14 @@
             <input type="hidden" name="revenue" value="<%= revenueFilter %>">
             <input type="hidden" name="popularity" value="<%= popularityFilter %>">
             <input type="hidden" name="moviesTotal" value="<%= moviesTotalFilter %>">
+            <input type="hidden" name="topLanguage" value="<%= topLanguageFilter %>">
           </form>
         </th>
 
         
 
 
-        <th><a href="?sortField=updated&sortOrder=<%= sortField === 'updated' && sortOrder === 'asc' ? 'desc' : 'asc' %>&gender=<%= genderFilter %>&revenue=<%= revenueFilter %>&popularity=<%= popularityFilter %>&moviesTotal=<%= moviesTotalFilter %>&top5billing=<%= top5billingFilter %>">Updated</a></th>
+        <th><a href="?sortField=updated&sortOrder=<%= sortField === 'updated' && sortOrder === 'asc' ? 'desc' : 'asc' %>&gender=<%= genderFilter %>&revenue=<%= revenueFilter %>&popularity=<%= popularityFilter %>&moviesTotal=<%= moviesTotalFilter %>&top5billing=<%= top5billingFilter %>&topLanguage=<%= topLanguageFilter %>">Updated</a></th>
 
       </tr>
     </thead>
@@ -137,6 +165,7 @@
           <td><a href="/actor/<%= actor.id %>"><%= actor.name %></a></td>
           <td><%= actor.id %></td>
           <td><%= actor.gender === 2 ? 'Male' : actor.gender === 1 ? 'Female' : 'Non-Binary' %></td>
+          <td><%= actor.topLanguage %></td>
           <td><%= actor.popularity %></td>
           <td>
             <% 
@@ -163,7 +192,7 @@
   <!-- Pagination -->
   <div class="pagination">
     <% for (let i = 1; i <= Math.ceil(totalActors / limit); i++) { %>
-      <a href="?page=<%= i %>&sortField=<%= sortField %>&sortOrder=<%= sortOrder %>&gender=<%= genderFilter %>&revenue=<%= revenueFilter %>&popularity=<%= popularityFilter %>&moviesTotal=<%= moviesTotalFilter %>&top5billing=<%= top5billingFilter %>" 
+      <a href="?page=<%= i %>&sortField=<%= sortField %>&sortOrder=<%= sortOrder %>&gender=<%= genderFilter %>&revenue=<%= revenueFilter %>&popularity=<%= popularityFilter %>&moviesTotal=<%= moviesTotalFilter %>&top5billing=<%= top5billingFilter %>&topLanguage=<%= topLanguageFilter %>" 
          class="<%= currentPage === i ? 'active' : '' %>"><%= i %></a>
     <% } %>
   </div>

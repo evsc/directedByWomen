@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Update Actor</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div><a href="/">Directed by Women</a></div>
+  <h1>Update Actor</h1>
+  <br/>
+  <p>If a performer is missing or has outdated data, submit their TMDB ID here: </p>
+
+  <div>
+    <form id="actorUpdateForm">
+      <label for="actorId">Enter Actor ID:</label>
+      <input type="text" id="actorId" name="actorId" required>
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+  <br/>
+  <div id="statusMessage">...</div>
+
+  <script>
+    document.getElementById('actorUpdateForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const actorId = document.getElementById('actorId').value;
+      const statusMessage = document.getElementById('statusMessage');
+
+      // Show initial loading message
+      statusMessage.innerText = 'Updating performer data, please wait... This could take up to a minute.';
+
+      try {
+        // Send the request to the server
+        const response = await fetch('/submit-actor-update', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ actorId })
+        });
+
+        // Check the response from the server
+        const result = await response.text();
+        if (response.ok) {
+          // Use innerHTML to render any HTML returned in the response
+          statusMessage.innerHTML = `Success: ${result}`;
+        } else {
+          statusMessage.innerText = `Error: ${result}`;
+        }
+      } catch (error) {
+        statusMessage.innerText = 'An error occurred while updating the actor.';
+        console.error('Error updating actor:', error);
+      }
+    });
+  </script>
+</body>
+</html>

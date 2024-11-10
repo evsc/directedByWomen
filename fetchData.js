@@ -13,8 +13,8 @@ function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-let updateThreshold = 1;  // days
-let currentPage = 247;
+let updateThreshold = 5;  // days
+let currentPage = 309;
 let currentActor = 380;
 
 
@@ -30,7 +30,6 @@ async function loopActorUpdates() {
     console.error('Error polling TMDB:', error);
   }
   currentActor++;
-  if(currentActor>500) currentActor = 1;
 }
 
 
@@ -47,12 +46,13 @@ async function loopPopularityPage() {
         const filteredActors = actors.filter(actor => actor.known_for_department === 'Acting');
 
         for (const actor of filteredActors) {
-            updateActor(actor.id,false);
+            updateActor(actor.id,true);
             // Wait for 1 second before processing the next actor
             await delay(1000);
         }
         // Increment the page count for the next API call
         currentPage++;
+        if(currentPage>500) currentPage = 1;
     } catch (error) {
         console.error('Error on loopPopularityPage:', error);
     }
@@ -60,20 +60,20 @@ async function loopPopularityPage() {
 
 
 async function updateActor(actorId, forceUpdate) {
-  console.log(`updateActor(${actorId})`)
+  // console.log(`updateActor(${actorId})`)
   // Check if actor exists in the database
   const existingActor = await Actor.findOne({ id: actorId });
   const now = new Date();
   const updateComparison = new Date(now.setDate(now.getDate() - updateThreshold));
 
   if(!forceUpdate && existingActor && existingActor.updated >= updateComparison) {
-    console.log(`Actor ${existingActor.name} already recently updated.`);
+    // console.log(`Actor ${existingActor.name} already recently updated.`);
         return;
   }
 
-  if (!existingActor) {
-    console.log(`Actor not found in DB.`);
-  }
+  // if (!existingActor) {
+  //   console.log(`Actor not found in DB.`);
+  // }
 
   try {
     const { data: actorData } = await axios.get(`https://api.themoviedb.org/3/person/${actorId}?api_key=${API_KEY}&language=en-US&append_to_response=images,movie_credits`);
@@ -84,7 +84,7 @@ async function updateActor(actorId, forceUpdate) {
         return; // End the function if the response is invalid
     }
 
-    console.log(`API call for (${actorData.name})`);
+    // console.log(`API call for (${actorData.name})`);
 
     if (actorData.known_for_department !== 'Acting') {
       console.log("Not an actor");
@@ -131,7 +131,9 @@ async function updateActor(actorId, forceUpdate) {
     // GO OVER ACTOR MOVIES
 
     // Filter out movies that have the "adult" value set to true
-    const filteredMovies = actorData.movie_credits.cast.filter(movie => !movie.adult);
+    // const filteredMovies = actorData.movie_credits.cast.filter(movie => !movie.adult);
+    // Filter out movies that have the "adult" value set to true or where the character includes "(voice)"
+    const filteredMovies = actorData.movie_credits.cast.filter(movie => !movie.adult && !movie.character.includes('(voice)'));
 
     const sortedMovies = filteredMovies.sort((a, b) => {
       const dateA = new Date(a.release_date);
@@ -146,7 +148,7 @@ async function updateActor(actorId, forceUpdate) {
     const allLanguages = [];
 
     for (const movie of sortedMovies) {
-      const updatedMovie = await updateMovie(movie.id);
+      const updatedMovie = await updateMovie(movie.id,false);
 
       // exclude movies 
       if(updatedMovie.release_date && updatedMovie.status == "Released" && updatedMovie.director.length < 4 && !updatedMovie.isDocumentary && updatedMovie.runtime > 40 && updatedMovie.imdb_id) {
@@ -197,7 +199,8 @@ async function updateActor(actorId, forceUpdate) {
     actor.movies_total = actor.movies.length;
     await actor.save();
 
-    console.log(`Actor ${actor.name}'s movies and directors updated successfully.`);
+    if(!existingActor) console.log(`\tNEW ENTRY:::::::::::::::::::> ${actor.name}`)
+    // console.log(`Actor ${actor.name}'s movies and directors updated successfully.`);
 
   } catch (err) {
     // console.error('Error fetching actor data.');
@@ -233,22 +236,37 @@ function getMostFrequentLanguage(allLanguages) {
 
 
 
-async function updateMovie(movieId) {
+async function updateMovie(movieId, forceUpdate) {
   const existingMovie = await Movie.findOne({ id: movieId });
   const now = new Date();
   const updateComparison = new Date(now.setDate(now.getDate() - updateThreshold));
 
-  const updateAnyways = true;
-  if(!updateAnyways && existingMovie && existingMovie.updated >= updateComparison) {
-    console.log(`Movie ${existingMovie.title} already recently updated.`);
-        return existingMovie;
+  if(!forceUpdate && existingMovie && existingMovie.updated >= updateComparison) {
+    // console.log(`Movie ${existingMovie.title} already recently updated.`);
+    return existingMovie;
   }
 
-  if (!existingMovie) {
-    console.log(`Movie not found in DB.`);
-  }
+  // if (!existingMovie) {
+  //   console.log(`Movie not found in DB.`);
+  // }
 
-  const { data: movieCreditsData } = await axios.get(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${API_KEY}&language=en-US&append_to_response=credits`);
+  let movieCreditsData = null;
+
+  try {
+    const response = await axios.get(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${API_KEY}&language=en-US&append_to_response=credits`);
+    movieCreditsData = response.data; 
+  } catch (error) {
+    if (error.response) {
+      // console.error('Error Status:', error.response.status);
+      // console.error('Error Data:', error.response.data);
+      console.error('Error Message:', error.response.statusText);
+    } else if (error.request) {
+      console.error('No response received:', error.request);
+    } else {
+      console.error('Error Message:', error.message);
+    }
+    return existingMovie;
+  }
 
 
   const leadTop5Ids = movieCreditsData.credits.cast
@@ -283,7 +301,7 @@ async function updateMovie(movieId) {
   if(!movieEntry.isDocumentary) {
     for (const crewMember of movieCreditsData.credits.crew) {
       if (crewMember.job === 'Director') {
-        const updatedDirector = await updateDirector(crewMember);
+        const updatedDirector = await updateDirector(crewMember,false);
 
         // Initialize as an empty array if it is not
         if (!Array.isArray(movieEntry.director)) {
@@ -306,6 +324,7 @@ async function updateMovie(movieId) {
 
   // Save the movie entry with updated directors
   await movieEntry.save();
+  if (!existingMovie) console.log(`\tNEW MOVIE ENTRY - - - - - - - - - > ${movieEntry.title}`)
 
   return movieEntry;
 
@@ -313,20 +332,19 @@ async function updateMovie(movieId) {
 
 
 
-async function updateDirector(crewMember) {
+async function updateDirector(crewMember,forceUpdate) {
   const existingDirector = await Director.findOne({ id: crewMember.id });
   const now = new Date();
   const updateComparison = new Date(now.setDate(now.getDate() - updateThreshold));
 
-  const updateAnyways = false;
-  if(!updateAnyways && existingDirector && existingDirector.updated >= updateComparison) {
+  if(!forceUpdate && existingDirector && existingDirector.updated >= updateComparison) {
     // console.log(`Director ${existingDirector.name} already recently updated.`);
         return existingDirector;
   }
 
-  if (!existingDirector) {
-    console.log(`Director not found in DB.`);
-  }
+  // if (!existingDirector) {
+  //   console.log(`Director not found in DB.`);
+  // }
 
   // Store director in DB if not already present
   const directorEntry = await Director.findOneAndUpdate(
@@ -342,6 +360,7 @@ async function updateDirector(crewMember) {
     { upsert: true, new: true }
   );
 
+  if (!existingDirector) console.log(`\tNEW DIRECTOR ENTRY ~~~~~~~~> ${directorEntry.name}`)
   return directorEntry;
 
 }
@@ -350,4 +369,4 @@ async function updateDirector(crewMember) {
 
 
 
-module.exports = { updateActor, loopPopularityPage, loopActorUpdates };
+module.exports = { updateActor, loopPopularityPage, loopActorUpdates, updateMovie, updateDirector };

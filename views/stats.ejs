@@ -32,12 +32,12 @@
     <thead>
       <tr>
         <th></th>
-        <th>Count</th>
+        <th>Performer count</th>
       </tr>
     </thead>
     <tbody>
         <tr>
-          <td>Total performers</td>
+          <td>Total</td>
           <td><%= stats[0].total %></td>
         </tr>
         <tr>
@@ -55,6 +55,77 @@
         <tr>
           <td>No topLanguage</td>
           <td><%= stats[0].noLanguage %></td>
+        </tr>
+        <tr>
+          <td>Female</td>
+          <td><%= stats[0].female %></td>
+        </tr>
+        <tr>
+          <td>Male</td>
+          <td><%= stats[0].male %></td>
+        </tr>
+        <tr>
+          <td>Non-Binary</td>
+          <td><%= stats[0].nonbinary %></td>
+        </tr>
+    </tbody>
+  </table>
+
+  <table>
+    <thead>
+      <tr>
+        <th></th>
+        <th>Movie count</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>Total</td>
+          <td><%= stats[1].total %></td>
+        </tr>
+        <tr>
+          <td>No revenue</td>
+          <td><%= stats[1].noRevenue %></td>
+        </tr>
+        <tr>
+          <td>Zero revenue</td>
+          <td><%= stats[1].zeroRevenue %></td>
+        </tr>
+        <tr>
+          <td>No language</td>
+          <td><%= stats[1].noLanguage %></td>
+        </tr>
+    </tbody>
+  </table>
+
+
+  <table>
+    <thead>
+      <tr>
+        <th></th>
+        <th>Director count</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>Total</td>
+          <td><%= stats[2].total %></td>
+        </tr>
+        <tr>
+          <td>Female</td>
+          <td><%= stats[2].female %></td>
+        </tr>
+        <tr>
+          <td>Male</td>
+          <td><%= stats[2].male %></td>
+        </tr>
+        <tr>
+          <td>Non-Binary</td>
+          <td><%= stats[2].nonbinary %></td>
+        </tr>
+        <tr>
+          <td>Zero</td>
+          <td><%= stats[2].zero %></td>
         </tr>
     </tbody>
   </table>

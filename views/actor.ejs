@@ -16,10 +16,11 @@
     <h2>Details:</h2>
     <ul>
         <li><strong>ID:</strong> <%= actor.id %></li>
+        <li><strong>TMDB profile:</strong> <a href="https://www.themoviedb.org/person/<%= actor.id %>"><%= actor.id %></a></li>
         <li><strong>Original Name:</strong> <%= actor.original_name %></li>
         <li><strong>Gender:</strong> <%= actor.gender === 1 ? 'Female' : actor.gender === 2 ? 'Male' : 'Non-Binary' %></li>
-        <li><strong>Birthday:</strong> <%= actor.birthday ? new Date(actor.birthday).toDateString() : "N/A" %></li>
-        <li><strong>Deathday:</strong> <%= actor.deathday ? new Date(actor.deathday).toDateString() : "" %></li>
+        <li><strong>Birthday:</strong> <%= actor.birthday ? new Date(actor.birthday).toLocaleDateString() : "N/A" %></li>
+        <li><strong>Deathday:</strong> <%= actor.deathday ? new Date(actor.deathday).toLocaleDateString() : "" %></li>
         <li><strong>Known for:</strong> <%= actor.known_for_department %></li>
         <li><strong>Popularity:</strong> <%= actor.popularity %></li>
         <li><strong>Revenue:</strong> <%= actor.revenue ? actor.revenue : 'N/A' %></li>

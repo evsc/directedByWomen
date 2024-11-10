@@ -3,10 +3,20 @@ const mongoose = require('mongoose');
 const path = require('path');
 require('dotenv').config(); // Ensure this is included to load .env variables
 
+const ISO6391 = require('iso-639-1');
+const customLanguageMap = {
+  'cn': 'Chinese',
+  'sh': 'Serbo-Croatian',
+  // Add any other custom codes here
+};
+function getLanguageName(code) {
+  return ISO6391.getName(code) || customLanguageMap[code] || 'Unknown';
+}
+
 const Movie = require('./models/Movie');
 const Actor = require('./models/Actor');
 const Director = require('./models/Director');
-const { updateActor, loopPopularityPage, loopActorUpdates } = require('./fetchData')
+const { updateActor, loopPopularityPage, loopActorUpdates, updateMovie, updateDirector } = require('./fetchData')
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
@@ -40,7 +50,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Define the main route
 app.get('/', async (req, res) => {
-  const { time = '10', gender = 'all', revenue = '1000000', popularity = 'all', movies = '10', top5billing = '5' } = req.query;
+  const { time = '10', gender = 'all', revenue = '1000000', popularity = 'all', movies = '10', top5billing = '5', topLanguage='all' } = req.query;
 
   try {
     // Build the query to fetch actors
@@ -66,6 +76,21 @@ app.get('/', async (req, res) => {
     if (top5billing !== 'all') {
       filterCriteria.top5billing = { $gte: parseInt(top5billing) };
     }
+
+    if (topLanguage !== 'all') {
+      if(topLanguage == 'not-en') {
+        filterCriteria.topLanguage = { $ne: 'en' };
+      } else {
+        filterCriteria.topLanguage = topLanguage;
+      }
+    }
+
+    // Fetch distinct languages and remove empty strings
+    const allLanguages = (await Actor.distinct("topLanguage"))
+      .filter(language => language !== null && language.trim() !== "");
+    // const languageNames = allLanguages.map(code => ISO6391.getName(code) || code);
+    const languageNames = allLanguages.map(code => getLanguageName(code));
+
 
     // Determine the count and list field based on the 'time' filter
     let countField = 'cnt_all';
@@ -95,7 +120,7 @@ app.get('/', async (req, res) => {
     }));
 
     // Render the index page with the actors
-    res.render('index', { actors: actorsData, time, gender, revenue, popularity, movies, top5billing });
+    res.render('index', { actors: actorsData, time, gender, revenue, popularity, movies, top5billing, topLanguage, allLanguages, languageNames });
   } catch (err) {
     console.error('Error fetching actors:', err);
     res.status(500).send('Internal server error');
@@ -105,48 +130,35 @@ app.get('/', async (req, res) => {
 
 // Define the main route
 app.get('/shame', async (req, res) => {
-  const { time = 'all', gender = 'all', revenue = '1000000000', popularity = 'all', movies = '25', top5billing = '20' } = req.query;
 
   try {
     // Build the query to fetch actors
     let filterCriteria = { known_for_department: 'Acting' };
-
-    // Filter by gender if provided
-    if (gender !== 'all') {
-      filterCriteria.gender = parseInt(gender);
-    }
-
-    if (revenue !== 'all') {
-      filterCriteria.revenue = { $gte: parseInt(revenue) };
-    }
-
-    if (popularity !== 'all') {
-      filterCriteria.popularity = { $gte: parseInt(popularity) };
-    }
-
-    if (movies !== 'all') {
-      filterCriteria.movies_total = { $gte: parseInt(movies) };
-    }
-
-    if (top5billing !== 'all') {
-      filterCriteria.top5billing = { $gte: parseInt(top5billing) };
-    }
+    filterCriteria.revenue = { $gte: 5000000000 };
+    filterCriteria.movies_total = { $gte: 25 };
+    filterCriteria.top5billing = { $gte: 20 };
+    filterCriteria.popularity = { $gte: 10 };
+    filterCriteria.cnt_all = 0;
+    const today = new Date(); 
+    filterCriteria.deathday = null;
 
     // Determine the count and list field based on the 'time' filter
-    let countField = 'cnt_all';
-    let listField = 'list_all';
+    // let countField = 'cnt_all';
+    // let listField = 'list_all';
 
-    // Fetch actors sorted by the number of movies directed by women, for the selected time period
+    // Fetch actors sorted by their total revenue
     const actors = await Actor.find(filterCriteria)
-      .sort({ [countField]: 1, revenue: -1 }) // Sort by the count of movies in descending order
-      .limit(50); // Limit the result to the top 10 actors
+      .sort({ revenue: -1 })
+      // .limit(100); // Limit the result to the top 10 actors
 
     // Prepare the result to send to the view
     const actorsData = actors.map(actor => ({
       name: actor.name,
+      id: actor.id,
       file_path: actor.file_path,
-      count: actor[countField],  // Get the count based on the time filter
-      list: actor[listField]      // Get the list based on the time filter
+      movies: actor.movies_total,
+      count: 0,  // Get the count based on the time filter
+      // list: actor[listField]      // Get the list based on the time filter
     }));
 
     // Render the index page with the actors
@@ -223,7 +235,11 @@ app.get('/all', async (req, res) => {
       filterCriteria.revenue = { $gte: parseInt(revenueFilter) };
     }
     if (topLanguageFilter !== 'all') {
-      filterCriteria.topLanguage = topLanguageFilter;
+      if(topLanguageFilter == 'not-en') {
+        filterCriteria.topLanguage = { $ne: 'en' };
+      } else {
+        filterCriteria.topLanguage = topLanguageFilter;
+      }
     }
 
     // Fetch actors with pagination, sorting, and filtering
@@ -235,6 +251,7 @@ app.get('/all', async (req, res) => {
     // Fetch distinct languages and remove empty strings
     const allLanguages = (await Actor.distinct("topLanguage"))
       .filter(language => language !== null && language.trim() !== "");
+    const languageNames = allLanguages.map(code => getLanguageName(code));
 
     // Count total actors for pagination with the applied filter
     const totalActors = await Actor.countDocuments(filterCriteria);
@@ -252,7 +269,8 @@ app.get('/all', async (req, res) => {
       moviesTotalFilter,
       top5billingFilter,
       topLanguageFilter,
-      allLanguages
+      allLanguages,
+      languageNames
     });
   } catch (error) {
     console.error('Error fetching actors:', error);
@@ -268,31 +286,44 @@ app.get('/stats', async (req, res) => {
     const oneWeekAgo = new Date(now.setDate(now.getDate() - 7));
 
     // Get counts for actors
-    const [actorsTotal, actorsUpdated, actorsWithoutRevenue, actorsWithoutTop5Billing, actorsWithoutBirthday, actorsWithoutLanguage] = await Promise.all([
+    const [actorsTotal, actorsUpdated, actorsWithoutRevenue, 
+    actorsWithoutTop5Billing, actorsWithoutBirthday, actorsWithoutLanguage,
+    actorsFemale, actorsMale, actorsNonBinary] = await Promise.all([
       Actor.countDocuments(),
       Actor.countDocuments({ updatedAt: { $gte: oneWeekAgo } }),
-      Actor.countDocuments({ $or: [{ revenue: { $exists: false } }, { revenue: null }, { revenue: "" }] }), // Count missing revenue
+      Actor.countDocuments({ $or: [{ revenue: { $exists: false } }, { revenue: null }, { revenue: "" }] }), 
       Actor.countDocuments({ top5billing: { $exists: false } }), // Count missing top5billing
       Actor.countDocuments({ birthday: { $exists: false } }), 
       Actor.countDocuments({ topLanguage: { $exists: false } }), 
+      Actor.countDocuments({ gender: 1 }), 
+      Actor.countDocuments({ gender: 2 }), 
+      Actor.countDocuments({ gender: 3 }), 
     ]);
 
-    const [moviesTotal, moviesUpdated] = await Promise.all([
+    const [moviesTotal, moviesUpdated, moviesNoRevenue, moviesZeroRevenue, moviesNoLanguage] = await Promise.all([
       Movie.countDocuments(),
       Movie.countDocuments({ updated: { $gte: oneWeekAgo } }),
+      Movie.countDocuments({ $or: [{ revenue: { $exists: false } }, { revenue: null }, { revenue: "" }] }),
+      Movie.countDocuments({ revenue: 0 }),
+      Movie.countDocuments({ $or: [{ original_language: { $exists: false } }, { original_language: null }, { original_language: "" }] }),
     ]);
 
-    const [directorsTotal, directorsUpdated] = await Promise.all([
+    const [directorsTotal, directorsUpdated,
+    directorsFemale, directorsMale, directorsNonBinary, directorsZero] = await Promise.all([
       Director.countDocuments(),
       Director.countDocuments({ updated: { $gte: oneWeekAgo } }),
+      Director.countDocuments({ gender: 1 }), 
+      Director.countDocuments({ gender: 2 }), 
+      Director.countDocuments({ gender: 3 }), 
+      Director.countDocuments({ gender: 0 }), 
     ]);
 
     // Pass the data to the stats view
     res.render('stats', {
       stats: [
-        { name: 'Actors', total: actorsTotal, updated: actorsUpdated, noRevenue: actorsWithoutRevenue, noTop5Billing: actorsWithoutTop5Billing, noBirthday: actorsWithoutBirthday, noLanguage: actorsWithoutLanguage },
-        { name: 'Movies', total: moviesTotal, updated: moviesUpdated },
-        { name: 'Directors', total: directorsTotal, updated: directorsUpdated },
+        { name: 'Actors', total: actorsTotal, updated: actorsUpdated, noRevenue: actorsWithoutRevenue, noTop5Billing: actorsWithoutTop5Billing, noBirthday: actorsWithoutBirthday, noLanguage: actorsWithoutLanguage, female: actorsFemale, male: actorsMale, nonbinary: actorsNonBinary },
+        { name: 'Movies', total: moviesTotal, updated: moviesUpdated, noRevenue: moviesNoRevenue, zeroRevenue: moviesZeroRevenue, noLanguage: moviesNoLanguage },
+        { name: 'Directors', total: directorsTotal, updated: directorsUpdated, female: directorsFemale, male: directorsMale, nonbinary: directorsNonBinary, zero: directorsZero },
       ],
     });
   } catch (error) {
@@ -320,19 +351,46 @@ app.post('/submit-actor-update', async (req, res) => {
 
 
 
-async function updateActorEntries() {
+async function updateSpecifics() {
   try {
-    // Fetch all actors from the database
-    const actors = await Actor.find();
 
-    for (let actor of actors) {
-      actor.movies_total = actor.movies.length;
-      await actor.save();
+    ////////////////// UPDATE MOVIE LANGUAGES //////////////////
+    // const moviesWithoutLanguage = await Movie.find({ original_language: { $exists: false } }).sort({ runtime: -1 }).limit(10000);
+    // console.log(`Found ${moviesWithoutLanguage.length} movies without original_language defined.`);
+
+    // // Loop over each movie and call updateMovie on it
+    // for (const movie of moviesWithoutLanguage) {
+    //   const updatedMovie = await updateMovie(movie.id); // Pass the movie's ID to updateMovie
+    //   console.log(`Updated language for ${updatedMovie.title} to ${updatedMovie.original_language}`);
+    // }
+
+    ////////////////// UPDATE DIRECTOR GENDERS //////////////////
+  //   const directorsWithoutGender = await Director.find({ $or: [
+  //   { gender: { $exists: false } }, // Gender field does not exist
+  //   { gender: { $nin: [1, 2, 3] } } // Gender field exists but is not 1, 2, or 3
+  // ] }).sort({ id: 1 }).limit(10);
+  //   console.log(`Found ${directorsWithoutGender.length} directors without gender defined.`);
+
+  //   for (const director of directorsWithoutGender) {
+  //     console.log(`${director.name} has gender: ${director.gender}`);
+  //     // const updatedDirector = await updateDirector(director.id); 
+  //     // console.log(`Updated gender for ${updatedDirector.name} to ${updatedDirector.gender}`);
+  //   }
+
+    ////////////////// UPDATE ACTOR BILLINGS //////////////////
+    // const actorsWithout = await Actor.find({ top5billing: { $exists: false }, known_for_department: 'Acting'}).sort({ id: 1 }).limit(1001);
+    const actorsWithout = await Actor.find({ birthday: { $exists: false }, known_for_department: 'Acting'}).sort({ id: 1 }).limit(1001);
+    console.log(`Found ${actorsWithout.length} actors without birthday defined.`);
+
+    for (const actor of actorsWithout) {
+      // console.log(`${actor.name} has gender: ${director.gender}`);
+      const updatedDirector = await updateActor(actor.id,true); 
+      // console.log(`Updated gender for ${updatedDirector.name} to ${updatedDirector.gender}`);
     }
 
-    console.log('All actors updated successfully!');
+    console.log('All updated successfully!');
   } catch (error) {
-    console.error('Error updating actors:', error);
+    console.error('Error updateSpecifics :', error);
   }
 }
 
@@ -347,9 +405,9 @@ app.use((req, res) => {
 
 
 
-
+// updateSpecifics();
 // loopPopularityPage();
-// setInterval(loopPopularityPage, 200000);
+// setInterval(loopPopularityPage, 60000);
 
 
 

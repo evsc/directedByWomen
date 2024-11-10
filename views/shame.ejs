@@ -12,7 +12,7 @@
   <div class="header">
     <div>
   <h1>The Shame List</h1>
-  <h2 class="subtitle">List of performers with a total movie revenue above 1 billion, at least 25 movie credits, at least 20 top-5-billings, but with the least films directed by women.</h2>
+  <h2 class="subtitle">List of living performers with a total movie revenue above 5 billion, at least 25 movie credits, at least 20 top-5-billings, a TMDB popularity above 10, but who never worked with a female movie director. The list is in descending order of total movie revenue. </h2>
 </div>
   </div>
 <!-- Actors list -->
@@ -20,25 +20,20 @@
   <div class="actors-list">
     <% actors.forEach(actor => { %>
 
-     <div class="actor">
-  <div class="actor-background" style="background-image: url('https://image.tmdb.org/t/p/w300<%= actor.file_path %>');width: calc(250px - <%= Math.min(actor.count * 50, 150) %>px);height: calc(250px - <%= Math.min(actor.count * 50, 150) %>px);">
-  
-    <p class="count"style="font-size: 10em"><%= actor.count %></p>
-    <h3><%= actor.name %></h3>
-
-    <div class="overlay">
-      <ul class="movie-list">
-        <% actor.list.forEach(movie => { %>
-          <li><%= movie %></li>
-        <% }) %>
-      </ul>
+  <a href="/actor/<%= actor.id %>">
+    <div class="actor">
+    <div class="actor-background" style="background-image: url('https://image.tmdb.org/t/p/w300<%= actor.file_path %>');width: 250px;height:250px;">
+    
+      <p class="count" style="font-size: 11em"><%= actor.count %></p>
+      <h3><%= actor.name %></h3>
+      0 of <%= actor.movies %> movies 
     </div>
-
-  </div>
+  </a>
 </div>
 
     <% }) %>
   </div>
+
 
 
 <footer>

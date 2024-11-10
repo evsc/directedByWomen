@@ -37,16 +37,18 @@
             <input type="hidden" name="topLanguage" value="<%= topLanguageFilter %>">
           </form>
         </th>
-
+        <th><a href="?sortField=birthday&sortOrder=<%= sortField === 'birthday' && sortOrder === 'asc' ? 'desc' : 'asc' %>&gender=<%= genderFilter %>&revenue=<%= revenueFilter %>&popularity=<%= popularityFilter %>&moviesTotal=<%= moviesTotalFilter %>&top5billing=<%= top5billingFilter %>&topLanguage=<%= topLanguageFilter %>">Birthday</a></th>
+        <th><a href="?sortField=deathday&sortOrder=<%= sortField === 'deathday' && sortOrder === 'asc' ? 'desc' : 'asc' %>&gender=<%= genderFilter %>&revenue=<%= revenueFilter %>&popularity=<%= popularityFilter %>&moviesTotal=<%= moviesTotalFilter %>&top5billing=<%= top5billingFilter %>&topLanguage=<%= topLanguageFilter %>">Deathday</a></th>
         <th>
         <a href="?sortField=topLanguage&sortOrder=<%= sortField === 'topLanguage' && sortOrder === 'asc' ? 'desc' : 'asc' %>&gender=<%= genderFilter %>&revenue=<%= revenueFilter %>&popularity=<%= popularityFilter %>&moviesTotal=<%= moviesTotalFilter %>&top5billing=<%= top5billingFilter %>">Top Language</a><br />
         <!-- Top Language Filter Dropdown in Header -->
         <form method="GET" action="/all" style="display: inline-block;">
           <select id="topLanguage-filter" name="topLanguage" onchange="this.form.submit()">
             <option value="all" <%= topLanguageFilter === 'all' ? 'selected' : '' %>>All</option>
-            <% allLanguages.forEach(language => { %>
+            <option value="not-en" <%= topLanguageFilter === 'not-en' ? 'selected' : '' %>>Not-English</option>
+            <% allLanguages.forEach((language, index) => { %>
               <option value="<%= language %>" <%= topLanguageFilter === language ? 'selected' : '' %>>
-                <%= language %>
+                <%= languageNames[index] %>
               </option>
             <% }); %>
           </select>
@@ -165,6 +167,8 @@
           <td><a href="/actor/<%= actor.id %>"><%= actor.name %></a></td>
           <td><%= actor.id %></td>
           <td><%= actor.gender === 2 ? 'Male' : actor.gender === 1 ? 'Female' : 'Non-Binary' %></td>
+          <td><%= actor.birthday ? new Date(actor.birthday).toLocaleDateString() : "" %></td>
+          <td><%= actor.deathday ? new Date(actor.deathday).toLocaleDateString() : "" %></td>
           <td><%= actor.topLanguage %></td>
           <td><%= actor.popularity %></td>
           <td>

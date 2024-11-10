@@ -20,6 +20,7 @@
       const popularitySelect = document.getElementById('popularity');
       const moviesSelect = document.getElementById('movies');
       const top5billingSelect = document.getElementById('top5billing');
+      const topLanguageSelect = document.getElementById('topLanguage');
 
       timeSelect.addEventListener('change', submitForm);
       genderSelect.addEventListener('change', submitForm);
@@ -27,6 +28,7 @@
       popularitySelect.addEventListener('change', submitForm);
       moviesSelect.addEventListener('change', submitForm);
       top5billingSelect.addEventListener('change', submitForm);
+      topLanguageSelect.addEventListener('change', submitForm);
     }
   </script>
 </head>
@@ -38,64 +40,78 @@
   <h2 class="subtitle">Top List of Performers in Films by Female Directors</h2>
 </div>
   <form id="filter-form">
+    
     <div>
-    <label for="time">Time span:</label>
-    <select id="time" name="time">
-      <option value="5" <%= time === '5' ? 'selected' : '' %>>Last 5 years</option>
-      <option value="10" <%= time === '10' ? 'selected' : '' %>>Last 10 years</option>
-      <option value="20" <%= time === '20' ? 'selected' : '' %>>Last 20 years</option>
-      <option value="all" <%= time === 'all' ? 'selected' : '' %>>All time</option>
-    </select>
-  </div>
-<div>
-    <label for="gender">Gender:</label>
-    <select id="gender" name="gender">
-      <option value="all" <%= gender === 'all' ? 'selected' : '' %>>All</option>
-      <option value="1" <%= gender === '1' ? 'selected' : '' %>>Actresses</option>
-      <option value="2" <%= gender === '2' ? 'selected' : '' %>>Actors</option>
-      <option value="3" <%= gender === '3' ? 'selected' : '' %>>Non-Binary</option>
-    </select>
-</div>
-<div>
+      <label for="time"><h3>Show results for</h3></label>
+      <select id="time" name="time">
+        <option value="5" <%= time === '5' ? 'selected' : '' %>>Last 5 years</option>
+        <option value="10" <%= time === '10' ? 'selected' : '' %>>Last 10 years</option>
+        <option value="20" <%= time === '20' ? 'selected' : '' %>>Last 20 years</option>
+        <option value="all" <%= time === 'all' ? 'selected' : '' %>>All time</option>
+      </select>
+    </div>
+    <h3>Filter peformers by</h3>
+    <div>
+      <label for="gender">Gender:</label>
+      <select id="gender" name="gender">
+        <option value="all" <%= gender === 'all' ? 'selected' : '' %>>All</option>
+        <option value="1" <%= gender === '1' ? 'selected' : '' %>>Actresses</option>
+        <option value="2" <%= gender === '2' ? 'selected' : '' %>>Actors</option>
+        <option value="3" <%= gender === '3' ? 'selected' : '' %>>Non-Binary</option>
+      </select>
+    </div>
+    <div>
     <label for="revenue">Movie revenue alltime:</label>
-    <select id="revenue" name="revenue">
-      <option value="all" <%= revenue === 'all' ? 'selected' : '' %>>All</option>
-      <option value="1000000" <%= revenue === '1000000' ? 'selected' : '' %>>Above 1 Million</option>
-      <option value="100000000" <%= revenue === '100000000' ? 'selected' : '' %>>Above 100 Million</option>
-      <option value="500000000" <%= revenue === '500000000' ? 'selected' : '' %>>Above 500 Million</option>
-      <option value="1000000000" <%= revenue === '1000000000' ? 'selected' : '' %>>Above 1 Billion</option>
-      <option value="5000000000" <%= revenue === '5000000000' ? 'selected' : '' %>>Above 5 Billion</option>
-    </select>
-</div>
-<div>
-    <label for="movies">Movie credits:</label>
-    <select id="movies" name="movies">
-      <option value="all" <%= movies === 'all' ? 'selected' : '' %>>All</option>
-      <option value="10" <%= movies === '10' ? 'selected' : '' %>>At least 10</option>
-      <option value="25" <%= movies === '25' ? 'selected' : '' %>>At least 25</option>
-      <option value="50" <%= movies === '50' ? 'selected' : '' %>>At least 50</option>
-      <option value="100" <%= movies === '100' ? 'selected' : '' %>>At least 100</option>
-    </select>
-</div>
-<div>
-    <label for="top5billing">Top 5 billings:</label>
-    <select id="top5billing" name="top5billing">
-      <option value="all" <%= top5billing === 'all' ? 'selected' : '' %>>All</option>
-      <option value="5" <%= top5billing === '5' ? 'selected' : '' %>>At least 5</option>
-      <option value="10" <%= top5billing === '10' ? 'selected' : '' %>>At least 10</option>
-      <option value="20" <%= top5billing === '20' ? 'selected' : '' %>>At least 20</option>
-    </select>
-</div>
-<div>
-    <label for="popularity">TMDB popularity:</label>
-    <select id="popularity" name="popularity">
-      <option value="all" <%= popularity === 'all' ? 'selected' : '' %>>All</option>
-      <option value="10" <%= popularity === '10' ? 'selected' : '' %>>Above 10</option>
-      <option value="25" <%= popularity === '25' ? 'selected' : '' %>>Above 25</option>
-      <option value="50" <%= popularity === '50' ? 'selected' : '' %>>Above 50</option>
-      <option value="100" <%= popularity === '100' ? 'selected' : '' %>>Above 100</option>
-    </select>
-</div>
+      <select id="revenue" name="revenue">
+        <option value="all" <%= revenue === 'all' ? 'selected' : '' %>>All</option>
+        <option value="1000000" <%= revenue === '1000000' ? 'selected' : '' %>>Above 1 Million</option>
+        <option value="100000000" <%= revenue === '100000000' ? 'selected' : '' %>>Above 100 Million</option>
+        <option value="500000000" <%= revenue === '500000000' ? 'selected' : '' %>>Above 500 Million</option>
+        <option value="1000000000" <%= revenue === '1000000000' ? 'selected' : '' %>>Above 1 Billion</option>
+        <option value="5000000000" <%= revenue === '5000000000' ? 'selected' : '' %>>Above 5 Billion</option>
+      </select>
+    </div>
+    <div>
+      <label for="movies">Movie credits alltime:</label>
+      <select id="movies" name="movies">
+        <option value="all" <%= movies === 'all' ? 'selected' : '' %>>All</option>
+        <option value="10" <%= movies === '10' ? 'selected' : '' %>>At least 10</option>
+        <option value="25" <%= movies === '25' ? 'selected' : '' %>>At least 25</option>
+        <option value="50" <%= movies === '50' ? 'selected' : '' %>>At least 50</option>
+        <option value="100" <%= movies === '100' ? 'selected' : '' %>>At least 100</option>
+      </select>
+    </div>
+    <div>
+      <label for="top5billing">Top 5 billings alltime:</label>
+      <select id="top5billing" name="top5billing">
+        <option value="all" <%= top5billing === 'all' ? 'selected' : '' %>>All</option>
+        <option value="5" <%= top5billing === '5' ? 'selected' : '' %>>At least 5</option>
+        <option value="10" <%= top5billing === '10' ? 'selected' : '' %>>At least 10</option>
+        <option value="20" <%= top5billing === '20' ? 'selected' : '' %>>At least 20</option>
+      </select>
+    </div>
+    <div>
+      <label for="popularity">Current TMDB popularity:</label>
+      <select id="popularity" name="popularity">
+        <option value="all" <%= popularity === 'all' ? 'selected' : '' %>>All</option>
+        <option value="10" <%= popularity === '10' ? 'selected' : '' %>>Above 10</option>
+        <option value="25" <%= popularity === '25' ? 'selected' : '' %>>Above 25</option>
+        <option value="50" <%= popularity === '50' ? 'selected' : '' %>>Above 50</option>
+        <option value="100" <%= popularity === '100' ? 'selected' : '' %>>Above 100</option>
+      </select>
+    </div>
+    <div>
+      <label for="topLanguage">Top Language alltime:</label>
+      <select id="topLanguage" name="topLanguage">
+        <option value="all" <%= topLanguage === 'all' ? 'selected' : '' %>>All</option>
+        <option value="not-en" <%= topLanguage === 'not-en' ? 'selected' : '' %>>Not-English</option>
+        <% allLanguages.forEach((language, index) => { %>
+          <option value="<%= language %>" <%= topLanguage === language ? 'selected' : '' %>>
+            <%= languageNames[index] %>
+          </option>
+        <% }); %>
+      </select>
+    </div>
 <br/>
 <div><a href="/all">Browse all</a> | <a href="/shame">The Shame List</a></div>
   </form>

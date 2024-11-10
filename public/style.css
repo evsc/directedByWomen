@@ -67,6 +67,13 @@ select {
 }
 
 
+.actors-list a {
+    color: #fff;             /* Keep sorting links white */
+    text-decoration: none;   /* Remove underline */
+}
+
+
+
 .actor {
   position: relative;
   color: white; /* Text color */
